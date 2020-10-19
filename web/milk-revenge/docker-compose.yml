@@ -1,0 +1,58 @@
+version: '2'
+services:
+  mongo:
+    restart: always
+    image: mongo
+  front:
+    restart: always
+    image: php:7-fpm
+    volumes:
+      - ./files/front:/var/www
+  api:
+    restart: always
+    image: hayd/alpine-deno
+    volumes:
+      - ./files/api:/app
+      - ./build/make-admin.ts:/tmp/make-admin.ts
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - >
+        ADMIN_USER=admin864357 ADMIN_PASS=Mjjav6BgZHvbAVP0V5uXwlHgXVp1yBbt deno run --allow-net --allow-write --allow-read --allow-plugin --allow-env --unstable /tmp/make-admin.ts &&
+        deno run --allow-net --allow-write --allow-read --allow-plugin --allow-env --unstable index.ts
+    environment:
+      - FLAG=SECCON{Okay_there_was_actually_unintended_solution_as_I_intended_blahblah}
+    depends_on:
+      - mongo
+  nginx:
+    restart: always
+    image: openresty/openresty
+    ports:
+      - 443:443
+    volumes:
+      - ./files/front:/var/www:ro
+      - ./files/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - ./build/credential.crt:/usr/local/openresty/nginx/conf/credential.crt:ro
+      - ./build/credential.key:/usr/local/openresty/nginx/conf/credential.key:ro
+      - ./build/.htpasswd:/usr/local/openresty/nginx/.htpasswd:ro
+    depends_on:
+      - front
+      - api
+  redis:
+    image: redis:4.0.8
+    restart: always
+  worker:
+    build: ./build/worker
+    depends_on:
+      - redis
+    restart: always
+    environment:
+      - DOMAIN=milk-revenge.chal.seccon.jp
+      - ADMIN_USER=admin864357
+      - ADMIN_PASS=Mjjav6BgZHvbAVP0V5uXwlHgXVp1yBbt
+  report:
+    build: ./build/publisher
+    depends_on:
+      - redis
+    restart: always

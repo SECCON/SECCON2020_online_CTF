@@ -1,0 +1,10 @@
+services:
+  tcpdump:
+    build:
+      context: .
+      dockerfile: Dockerfile.tcpdump
+    command: /bin/sh -c "/usr/sbin/tcpdump -s 0 -C 100 -W 500 -w /data/`date +%Y%m%d%H%M%S`.pcap tcp port 10000"
+    network_mode: service:server
+    restart: always
+    volumes:
+      - ${HOME}/pincette_pcap:/data

@@ -1,0 +1,20 @@
+--- a/Makefile
++++ b/Makefile
+@@ -111,7 +111,7 @@
+ 
+ obj/crt/rcrt1.o: $(srcdir)/ldso/dlstart.c
+ 
+-obj/crt/Scrt1.o obj/crt/rcrt1.o: CFLAGS_ALL += -fPIC
++obj/crt/Scrt1.o obj/crt/rcrt1.o: CFLAGS_ALL += -fno-PIC -mcmodel=large
+ 
+ OPTIMIZE_SRCS = $(wildcard $(OPTIMIZE_GLOBS:%=$(srcdir)/src/%))
+ $(OPTIMIZE_SRCS:$(srcdir)/%.c=obj/%.o) $(OPTIMIZE_SRCS:$(srcdir)/%.c=obj/%.lo): CFLAGS += -O3
+@@ -127,7 +127,7 @@
+ 
+ $(CRT_OBJS): CFLAGS_ALL += -DCRT
+ 
+-$(LOBJS) $(LDSO_OBJS): CFLAGS_ALL += -fPIC
++$(LOBJS) $(LDSO_OBJS): CFLAGS_ALL += -fno-PIC -mcmodel=large
+ 
+ CC_CMD = $(CC) $(CFLAGS_ALL) -c -o $@ $<
+ 

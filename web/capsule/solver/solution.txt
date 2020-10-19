@@ -1,0 +1,9 @@
+global.flag = flag;
+const inspector = require('inspector');
+const session = new inspector.Session();
+session.connect();
+session.post('Runtime.evaluate', {expression: 'flag'}, (e, d) => {
+  session.post('Runtime.getProperties', {objectId: d.result.objectId}, (e, d) => {
+    console.log(d.privateProperties[0].value.value);
+  });
+});

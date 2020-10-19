@@ -1,0 +1,13 @@
+version: '3'
+services:
+  lazynote:
+    build:
+      context: .
+    working_dir: /home/pwn
+    container_name: lazynote
+    ulimits:
+      nproc: 65535
+      core: 0
+    ports:
+      - "9003:9999"
+    entrypoint: /etc/init.sh

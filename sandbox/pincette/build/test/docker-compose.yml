@@ -1,0 +1,9 @@
+version: '3'
+services:
+  client:
+    build: .
+
+networks:
+  default:
+    external:
+      name: host

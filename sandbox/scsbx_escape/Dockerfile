@@ -1,0 +1,25 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get -y update --fix-missing && apt-get -y upgrade
+RUN apt-get -y install xinetd
+RUN groupadd -r pwn && useradd -r -g pwn pwn
+
+ADD build/pwn.xinetd /etc/xinetd.d/pwn
+ADD build/init.sh    /etc/init.sh
+ADD build/redir.sh   /home/pwn/redir.sh
+RUN chmod 500  /etc/init.sh
+RUN chmod 550  /home/pwn/redir.sh
+RUN chmod 1733 /tmp /var/tmp /dev/shm
+
+WORKDIR /home/pwn
+ADD build/flag.txt flag.txt
+ADD files/scsbx    scsbx
+RUN chmod 440 flag.txt
+RUN chmod 550 scsbx
+RUN mv flag.txt flag-$(md5sum flag.txt | awk '{print $1}').txt
+
+RUN chown -R root:pwn .
+
+RUN service xinetd restart

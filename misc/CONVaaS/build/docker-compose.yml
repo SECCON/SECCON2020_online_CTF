@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  convaas:
+    build:
+      context: ./convaas
+      args:
+        convaas_user: convaas
+        convaas_uid: 1000
+        convaas_gid: 1000
+        convaas_home: /home/convaas
+        convaas_basedir: /tmp/convaas/
+    restart: always
+    read_only: true
+    command: python server.py -v --config convaas.yaml
+    volumes:
+      - convaas_data:/tmp/
+
+  proxy:
+    image: nginx:alpine
+    depends_on:
+      - convaas
+    ports:
+      - 53440:53440
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  convaas_data:

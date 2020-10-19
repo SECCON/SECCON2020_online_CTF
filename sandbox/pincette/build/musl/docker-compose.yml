@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  builder:
+    build: .
+    user: "1000:1000"
+    command: sh -c "cp -p /opt/musl/musl_*.deb /opt/output"
+    volumes:
+      - ../pincette/musl:/opt/output

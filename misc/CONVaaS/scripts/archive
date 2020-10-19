@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -eu
+
+dummy='this_is_a_dummy_flag'
+
+srcdir="${1}"
+[ ! -d "${srcdir}" ] && echo 'archive: '"${srcdir}"': No such file or directory' >&2 && exit 1
+
+tempdir='CONVaaS'
+extension='.tar.gz'
+archive="${tempdir}""${extension}"
+[ -d "${tempdir}" ] && echo "[-] '""${tempdir}""' already exists" >&2 && exit 1
+[ -f "${archive}" ] && echo "[-] '""${archive}""' already exists" >&2 && exit 1
+
+cp -R "${srcdir}" "${tempdir}"
+
+# Archive the challenge files but not the real flag
+echo "[*] Archiving '""${srcdir}""' to '""${archive}""' without the real flag"
+flag_path="${tempdir}"'/convaas/flag.txt'
+keyword=$(head -1 "${flag_path}" | grep -oP '(?<=SECCON\{)(.*)(?=\})')
+for f in $(grep -lR "${keyword}" ${tempdir})
+do
+    sed -i "${f}" -e 's/'"${keyword}"'/'"${dummy}"'/g'
+done
+tar -caf "${archive}" --owner=0 --group=0 "${tempdir}"
+rm -rf "${tempdir}"
+
+# Check no real flag in the archive
+echo '[*] Validating the archive file'
+tar xf "${archive}"
+if grep -q "${keyword}" "${flag_path}"
+then
+    echo '[!] Removing the archive due to detection of the real flag'
+    grep -nR "${keyword}" "${tempdir}"
+    rm -f "${archive}"
+else
+    echo '[+] No real flag detected:'
+    grep -nR "${dummy}" "${tempdir}"
+    rm -rf "${tempdir}"
+    mv "${archive}" "${tempdir}".$(md5sum "${archive}" | awk '{{ print $1 }}')"${extension}"
+fi

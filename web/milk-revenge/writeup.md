@@ -1,0 +1,1 @@
+NginX Cache Poisoning + CSRF Token Reuse + CORS Policy Abuse by FQDN
